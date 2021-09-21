@@ -1,32 +1,37 @@
 import style from "./SearchBar.module.css";
-import React, { Component } from "react";
+// import React, { Component } from "react";
+import {useState} from 'react';
 import { toast } from "react-toastify";
 // import PropTypes from 'prop-types';
 
-class SearchBar extends Component {
-  state = {
-    searchFieldvalue: "",
+function SearchBar ({onSubmit}) {
+  // state = {
+  //   searchFieldvalue: "",
+  // };
+
+  const [searchFieldvalue, setSearchFieldvalue] = useState('');
+
+  const handleFieldChange = (e) => {
+    
+    setSearchFieldvalue(e.currentTarget.value.toLowerCase());
+
   };
 
-  handleFieldChange = (e) => {
-    this.setState({ searchFieldvalue: e.currentTarget.value.toLowerCase() });
-  };
-
-  handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (this.state.searchFieldvalue.trim() === "") {
+    if (searchFieldvalue.trim() === "") {
       toast("Вы ввели пустое поле");
       return;
     }
-    this.props.onSubmit(this.state.searchFieldvalue);
-    this.setState({ searchFieldvalue: "" });
+    onSubmit(searchFieldvalue);
+    setSearchFieldvalue('');
   };
 
-  render() {
+  
     return (
       <header className={style.Searchbar}>
-        <form onSubmit={this.handleSubmit} className={style.SearchForm}>
+        <form onSubmit={handleSubmit} className={style.SearchForm}>
           <button type="submit" className={style.button}>
             <span className={style.label}>Search</span>
           </button>
@@ -34,8 +39,8 @@ class SearchBar extends Component {
           <input
             className={style.input}
             type="text"
-            value={this.state.searchFieldvalue}
-            onChange={this.handleFieldChange}
+            value={searchFieldvalue}
+            onChange={handleFieldChange}
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
@@ -43,7 +48,7 @@ class SearchBar extends Component {
         </form>
       </header>
     );
-  }
+  
 }
 
 // SearchBar.propTypes = {
@@ -51,3 +56,54 @@ class SearchBar extends Component {
 // };
 
 export default SearchBar;
+
+
+
+// class SearchBar extends Component {
+//   state = {
+//     searchFieldvalue: "",
+//   };
+
+//   handleFieldChange = (e) => {
+//     this.setState({ searchFieldvalue: e.currentTarget.value.toLowerCase() });
+//   };
+
+//   handleSubmit = (e) => {
+//     e.preventDefault();
+
+//     if (this.state.searchFieldvalue.trim() === "") {
+//       toast("Вы ввели пустое поле");
+//       return;
+//     }
+//     this.props.onSubmit(this.state.searchFieldvalue);
+//     this.setState({ searchFieldvalue: "" });
+//   };
+
+//   render() {
+//     return (
+//       <header className={style.Searchbar}>
+//         <form onSubmit={this.handleSubmit} className={style.SearchForm}>
+//           <button type="submit" className={style.button}>
+//             <span className={style.label}>Search</span>
+//           </button>
+
+//           <input
+//             className={style.input}
+//             type="text"
+//             value={this.state.searchFieldvalue}
+//             onChange={this.handleFieldChange}
+//             autoComplete="off"
+//             autoFocus
+//             placeholder="Search images and photos"
+//           />
+//         </form>
+//       </header>
+//     );
+//   }
+// }
+
+// // SearchBar.propTypes = {
+
+// // };
+
+// export default SearchBar;

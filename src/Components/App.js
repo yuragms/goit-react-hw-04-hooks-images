@@ -1,4 +1,5 @@
-import React, { Component } from "react";
+// import React, { Component } from "react";
+import { useEffect, useState } from 'react';
 import SearchBar from "./Searchbar/SearchBar.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -9,118 +10,93 @@ import style from "./App.module.css";
 import { Spinner } from "./Loader/Loader.jsx";
 import fetchAPI from "./API/API.js";
 
-class App extends Component {
-  state = {
-    data: [],
-    page: 1,
-    loading: false,
-    searchFieldvalue: "",
-    error: null,
-    selectedlargeImageURL: null,
-    taglargeImage: null,
-  };
+function App () {
+  const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [searchFieldvalue, setSearchFieldvalue] = useState('');
+  const [error, setError] = useState(null);
+  const [selectedlargeImageURL, setSelectedlargeImageURL] = useState(null);
+  const [taglargeImage, setTaglargeImage] = useState(null);
 
-  componentDidUpdate(prevProps, prevState) {
-    const prevFieldvalue = prevState.searchFieldvalue;
-    const nextFieldvalue = this.state.searchFieldvalue;
-    const page = this.state.page;
+ 
 
-    if (prevFieldvalue !== nextFieldvalue || prevState.page !== page) {
-      console.log("ИЗМЕНИЛОСЬ ПОЛЕ ПОСКА");
+  useEffect(() => {
+    if (!searchFieldvalue) {return}
+    setLoading(true);
 
-      this.setState({ loading: true });
+    fetchAPI
+    .fetchFirstArr(searchFieldvalue, page)
+    .then((data) => {
+      if (data.hits.length > 0) {
+        console.log(7777);
+      } else {
+        setError(1);
+      }
+      setData( prevState => [...prevState, ...data.hits] );
+    })
+    .then(
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      })
+    )
+    .catch((error) => setError(error ))
+    .finally(() => setLoading( false ));
 
-      fetchAPI
-        .fetchFirstArr(nextFieldvalue, page)
-        .then((data) => {
-          if (data.hits.length > 0) {
-            console.log(7777);
-          } else {
-            this.setState({ error: 1 });
-          }
-          this.setState({ data: [...data.hits] });
-        })
-        .then(
-          window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: "smooth",
-          })
-        )
-        .catch((error) => this.setState({ error }))
-        .finally(() => this.setState({ loading: false }));
-    }
+  }, [searchFieldvalue, page]);
 
-    if (prevState.page !== page) {
-      console.log("Изменилась пагинация");
+  
+ 
 
-      this.setState({ loading: true });
-
-      fetchAPI
-        .fetchFirstArr(nextFieldvalue, page)
-        .then((data) => {
-          this.setState({ data: [...prevState.data, ...data.hits] });
-        })
-        .then(
-          window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: "smooth",
-          })
-        )
-        .catch((error) => this.setState({ error }))
-        .finally(() => this.setState({ loading: false }));
-    }
-  }
-
-  handleClickImage = (largeImage) => {
-    // this.setState({ selectedImage: largeImageURL });
-    console.log(largeImage);
-    const data = this.state.data;
+  const handleClickImage = (largeImage) => {
     const tagObject = data.find((item) => item.largeImageURL === largeImage);
+
     if (tagObject) {
       const tag = tagObject.tags;
       console.log(tag);
-      this.setState({ selectedlargeImageURL: largeImage });
-      this.setState({ taglargeImage: tag });
+      setSelectedlargeImageURL(largeImage);
+      setTaglargeImage(tag);
     }
   };
 
-  handleCloseModal = () => {
-    this.setState({ selectedlargeImageURL: null });
-    this.setState({ taglargeImage: null });
+ 
+  const handleCloseModal = () => {
+    setSelectedlargeImageURL(null);
+    setTaglargeImage(null);
   };
 
-  handleBackdropClose = (e) => {
+  const handleBackdropClose = (e) => {
     if (e.currentTarget === e.target) {
-      this.handleCloseModal();
+      handleCloseModal();
     }
   };
 
-  handleFormSubmit = (searchFieldvalue) => {
-    console.log(`searchFieldvalue 12`);
-
-    this.setState({ searchFieldvalue, page: 1, data: [], error: null });
+  const handleFormSubmit = (searchFieldvalue) => {
+    setSearchFieldvalue(searchFieldvalue);
+    setPage(1);
+    setData([]);
+    setError(null);
   };
 
-  handleClickLoadMore = () => {
-    this.setState((prevState) => ({ page: prevState.page + 1 }));
+ const  handleClickLoadMore = () => {
+    setPage(prevState => prevState + 1 );
   };
 
-  render() {
-    const { data, loading, error, selectedlargeImageURL, taglargeImage } =
-      this.state;
+  
 
     const showButton = data.length > 0;
-    console.log(`data999`);
+    
     return (
       <div>
-        <SearchBar onSubmit={this.handleFormSubmit} />
+        <SearchBar onSubmit={handleFormSubmit} />
         {error && <h1>Нет данных с таким запросом</h1>}
         {loading && <Spinner />}
 
-        {data && <ImageGallery hits={data} onClick={this.handleClickImage} />}
+        {data && <ImageGallery hits={data} onClick={handleClickImage} />}
         {showButton && (
           <div className={style.ModBut}>
-            <ButtonMore handleClickLoadMore={this.handleClickLoadMore} />
+            <ButtonMore handleClickLoadMore={handleClickLoadMore} />
           </div>
         )}
 
@@ -129,13 +105,13 @@ class App extends Component {
           <Modal
             url={selectedlargeImageURL}
             tag={taglargeImage}
-            handleBackdropClose={this.handleBackdropClose}
-            handleCloseModal={this.handleCloseModal}
+            handleBackdropClose={handleBackdropClose}
+            handleCloseModal={handleCloseModal}
           />
         )}
       </div>
     );
-  }
+  
 }
 
 export default App;

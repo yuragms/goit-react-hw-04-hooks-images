@@ -1,31 +1,27 @@
-import React, { Component } from "react";
+// import React, { Component } from "react";
+import { useEffect } from 'react';
 import style from "./Modal.module.css";
 import PropTypes from "prop-types";
 
-class Modal extends Component {
-  static propTypes = {
-    url: PropTypes.string,
-    tag: PropTypes.string,
-    handleBackdropClose: PropTypes.func.isRequired,
-    handleCloseModal: PropTypes.func.isRequired,
-  };
+function Modal ({url, tag, handleCloseModal, handleBackdropClose}) {
+  
+useEffect(()=> {
+document.addEventListener("keydown", handleEscClose);
 
-  componentDidMount() {
-    document.addEventListener("keydown", this.handleEscClose);
-  }
+return () => {
+  document.removeEventListener("keydown", handleEscClose);
+};
+});
 
-  componentWillUnmount() {
-    document.removeEventListener("keydown", this.handleEscClose);
-  }
 
-  handleEscClose = (e) => {
+ const handleEscClose = (e) => {
     if (e.code === "Escape") {
-      this.props.handleCloseModal();
+      handleCloseModal();
     }
   };
 
-  render() {
-    const { url, tag, handleBackdropClose } = this.props;
+  
+    
     return (
       <div className={style.Overlay} onClick={(e) => handleBackdropClose(e)}>
         <div className={style.Modal}>
@@ -33,7 +29,14 @@ class Modal extends Component {
         </div>
       </div>
     );
-  }
+  
 }
+
+Modal.propTypes = {
+  url: PropTypes.string,
+  tag: PropTypes.string,
+  handleBackdropClose: PropTypes.func.isRequired,
+  handleCloseModal: PropTypes.func.isRequired,
+};
 
 export default Modal;
